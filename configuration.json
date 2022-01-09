@@ -1,0 +1,116 @@
+[
+  {
+    "key": "Azure.tenant_id",
+    "type": "input",
+    "defaultValue": "",
+    "templateOptions": {
+      "label": "Azure - Directory (tenant) ID",
+      "placeholder": "********-****-****-****-************",
+      "description": "",
+      "required": true
+    }
+  },
+  {
+    "key": "Azure.client_id",
+    "type": "input",
+    "defaultValue": "",
+    "templateOptions": {
+      "label": "Azure - Application (client) ID",
+      "placeholder": "********-****-****-****-************",
+      "description": "",
+      "required": true
+    }
+  },
+  {
+    "key": "Azure.client_secret",
+    "type": "input",
+    "defaultValue": "",
+    "templateOptions": {
+      "label": "Azure - Application (client) Secret",
+      "type": "password",
+      "placeholder": "*************.*******.************",
+      "required": true
+    }
+  },
+  {
+    "key": "Managables.email",
+    "type": "checkbox",
+    "defaultValue": false,
+    "templateOptions": {
+      "label": "manage Email Authentication",
+      "required": false
+    }
+  },
+  {
+    "key": "Updatables.email",
+    "type": "checkbox",
+    "defaultValue": false,
+    "templateOptions": {
+      "label": "Allow Updates for Email Authentication",
+      "required": false
+    }
+  },
+  {
+    "key": "Managables.mobile",
+    "type": "checkbox",
+    "defaultValue": false,
+    "templateOptions": {
+      "label": "Manage Mobile Authentication",
+      "required": false
+    }
+  },
+  {
+    "key": "Updatables.mobile",
+    "type": "checkbox",
+    "defaultValue": false,
+    "templateOptions": {
+      "label": "Allow Updates for Mobile Authentication",
+      "required": false
+    }
+  },
+  {
+    "key": "enableSMSSignIn",
+    "type": "checkbox",
+    "defaultValue": false,
+    "templateOptions": {
+      "label": "Enable SMS SignIn for Mobile Authentication",
+      "required": false
+    }
+  },
+  {
+    "key": "Managables.alternateMobile",
+    "type": "checkbox",
+    "defaultValue": false,
+    "templateOptions": {
+      "label": "Manage Alternate Mobile Authentication",
+      "required": false
+    }
+  },
+  {
+    "key": "Updatables.alternateMobile",
+    "type": "checkbox",
+    "defaultValue": false,
+    "templateOptions": {
+      "label": "Allow Updates for Alternate Mobile Authentication",
+      "required": false
+    }
+  },
+  {
+    "key": "Managables.office",
+    "type": "checkbox",
+    "defaultValue": false,
+    "templateOptions": {
+      "label": "Manage Office Authentication",
+      "required": false
+    }
+  },
+  {
+    "key": "Updatables.office",
+    "type": "checkbox",
+    "defaultValue": false,
+    "templateOptions": {
+      "label": "Allow Updates for Office Authentication",
+      "required": false
+    }
+  }
+]

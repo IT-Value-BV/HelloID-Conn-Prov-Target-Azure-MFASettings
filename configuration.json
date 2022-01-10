@@ -33,7 +33,7 @@
     }
   },
   {
-    "key": "Managables.email",
+    "key": "Fields.email.Create",
     "type": "checkbox",
     "defaultValue": false,
     "templateOptions": {
@@ -42,7 +42,7 @@
     }
   },
   {
-    "key": "Updatables.email",
+    "key": "Fields.email.Update",
     "type": "checkbox",
     "defaultValue": false,
     "templateOptions": {
@@ -51,7 +51,16 @@
     }
   },
   {
-    "key": "Managables.mobile",
+    "key": "Fields.email.Delete",
+    "type": "checkbox",
+    "defaultValue": false,
+    "templateOptions": {
+      "label": "Allow Deletes for Email Authentication",
+      "required": false
+    }
+  },
+  {
+    "key": "Fields.mobile.Create",
     "type": "checkbox",
     "defaultValue": false,
     "templateOptions": {
@@ -60,11 +69,20 @@
     }
   },
   {
-    "key": "Updatables.mobile",
+    "key": "Fields.mobile.Update",
     "type": "checkbox",
     "defaultValue": false,
     "templateOptions": {
       "label": "Allow Updates for Mobile Authentication",
+      "required": false
+    }
+  },
+  {
+    "key": "Fields.mobile.Delete",
+    "type": "checkbox",
+    "defaultValue": false,
+    "templateOptions": {
+      "label": "Allow Deletes for Mobile Authentication",
       "required": false
     }
   },
@@ -78,7 +96,7 @@
     }
   },
   {
-    "key": "Managables.alternateMobile",
+    "key": "Fields.alternateMobile.Create",
     "type": "checkbox",
     "defaultValue": false,
     "templateOptions": {
@@ -87,7 +105,7 @@
     }
   },
   {
-    "key": "Updatables.alternateMobile",
+    "key": "Fields.alternateMobile.Update",
     "type": "checkbox",
     "defaultValue": false,
     "templateOptions": {
@@ -96,7 +114,16 @@
     }
   },
   {
-    "key": "Managables.office",
+    "key": "Fields.alternateMobile.Delete",
+    "type": "checkbox",
+    "defaultValue": false,
+    "templateOptions": {
+      "label": "Allow Deletes for Alternate Mobile Authentication",
+      "required": false
+    }
+  },
+  {
+    "key": "Fields.office.Create",
     "type": "checkbox",
     "defaultValue": false,
     "templateOptions": {
@@ -105,11 +132,20 @@
     }
   },
   {
-    "key": "Updatables.office",
+    "key": "Fields.office.Update",
     "type": "checkbox",
     "defaultValue": false,
     "templateOptions": {
       "label": "Allow Updates for Office Authentication",
+      "required": false
+    }
+  },
+  {
+    "key": "Fields.office.Delete",
+    "type": "checkbox",
+    "defaultValue": false,
+    "templateOptions": {
+      "label": "Allow Deletes for Office Authentication",
       "required": false
     }
   }

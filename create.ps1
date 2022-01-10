@@ -3,8 +3,7 @@ $Config = $Configuration | ConvertFrom-Json
 # $Config = Get-Content -Raw -Path '../Target-Azure-MFASettings.json' | ConvertFrom-Json
 
 $Azure = $Config.Azure
-$Managables = $Config.Managables
-$Updatables = $Config.Updatables
+$Managables = $Config.Fields
 
 $enableSMSSignIn = $Config.enableSMSSignIn
 #endregion Config
@@ -17,6 +16,7 @@ $aRef = New-Guid
 $mRef = $ManagerAccountReference | ConvertFrom-Json
 
 $AuditLogs = [Collections.Generic.List[PSCustomObject]]::new()
+$Success = $False
 #endregion default properties
 
 # Set TLS to accept TLS, TLS 1.1 and TLS 1.2
@@ -28,7 +28,6 @@ $AuditLogs = [Collections.Generic.List[PSCustomObject]]::new()
 
 #region Functions
 Function Format-PhoneNumber {
-
     [cmdletbinding()]
     Param(
         [parameter(ValueFromPipeline)]
@@ -40,10 +39,13 @@ Function Format-PhoneNumber {
         return $null
     }
 
-    $PhoneNumber = $PhoneNumber -Replace '[^\d]', ''
+    $Phone = $PhoneNumber -Replace '[^\d]', ''
 
-    if ($PhoneNumber -match '^(06|3106|316)*') {
-        return $PhoneNumber -replace '^(06|3106|316)*', '+31 6'
+    if (
+        ($Phone -match '^(0031|31)*' -and $phone.Length -ge 11 -and $phone.Length -le 14) -or
+        ($Phone.StartsWith('0') -and $Phone.Length -eq 10)
+    ) {
+        return '+31 ' + $phone.Substring($phone.Length - 9)
     }
 
     return $PhoneNumber
@@ -59,8 +61,6 @@ $Account = [PSCustomObject]@{
 }
 
 $UserPrincipalName = $p.Accounts.MicrosoftActiveDirectory.userPrincipalName
-
-$Success = $False
 
 # Start Script
 try {
@@ -95,7 +95,7 @@ try {
         }
     }
 
-    # Get the guid for reference
+    # Get the user guid for the reference
     Try {
         $Uri = "https://graph.microsoft.com/v1.0/users/$($userPrincipalName)"
         $aRef = (Invoke-RestMethod @AADMethod -Method 'Get' -Uri $Uri).id
@@ -123,7 +123,7 @@ try {
     Alternate Phone cannot be set when there is no primary phone configured,
     So for this case, we will edit the account a bit to accomodate
     #>
-    if ($Managables.alternateMobile) {
+    if ($Managables.alternateMobile.Create) {
         if (
             -Not [string]::IsNullOrWhiteSpace($Account.mobile) -and
             -Not [string]::IsNullOrWhiteSpace($Account.alternateMobile) -and
@@ -133,16 +133,15 @@ try {
             # we want to shift the mobile phone to the alternate mobile phone,
             # so we force this field to be updatable
             # The alternate mobile is empty, but to be sure, we set it updateable
-            $Updatables.mobile = $True
-            $Updatables.alternateMobile = $True
+            $Managables.mobile.Update = $True
+            $Managables.alternateMobile.Update = $True
         }
 
         elseif (
             [string]::IsNullOrWhiteSpace($Account.mobile) -and
             -Not [string]::IsNullOrWhiteSpace($Account.alternateMobile)
         ) {
-            # Only the alternate mobile is provided, so we will set it to the mobile field,
-            # we cannot provide an
+            # Only the alternate mobile is provided, so we will set it to the mobile field
             $Account.mobile = $Account.alternateMobile
             $Account.alternateMobile = $null
         }
@@ -150,32 +149,32 @@ try {
 
     $AuthMethods = @(
         [PSCustomObject]@{
-            Key        = "email"
-            BaseUrl    = $BaseUri + "/emailMethods"
-            Body       = [PSCustomObject]@{
+            Key     = "email"
+            BaseUrl = $BaseUri + "/emailMethods"
+            Body    = [PSCustomObject]@{
                 emailAddress = $Account.email
             }
         }
         [PSCustomObject]@{
-            Key        = "mobile"
-            BaseUrl    = $BaseUri + "/phoneMethods"
-            Body       = [PSCustomObject]@{
+            Key     = "mobile"
+            BaseUrl = $BaseUri + "/phoneMethods"
+            Body    = [PSCustomObject]@{
                 phoneNumber = $Account.mobile
                 phoneType   = "mobile"
             }
         }
         [PSCustomObject]@{
-            Key        = "alternateMobile"
-            BaseUrl    = $BaseUri + "/phoneMethods"
-            Body       = [PSCustomObject]@{
+            Key     = "alternateMobile"
+            BaseUrl = $BaseUri + "/phoneMethods"
+            Body    = [PSCustomObject]@{
                 phoneNumber = $Account.alternateMobile
                 phoneType   = "alternateMobile"
             }
         }
         [PSCustomObject]@{
-            Key        = "office"
-            BaseUrl    = $BaseUri + "/phoneMethods"
-            Body       = [PSCustomObject]@{
+            Key     = "office"
+            BaseUrl = $BaseUri + "/phoneMethods"
+            Body    = [PSCustomObject]@{
                 phoneNumber = $Account.office
                 phoneType   = "office"
             }
@@ -183,20 +182,41 @@ try {
     )
 
     $AuthMethods | Where-Object {
-        $Managables.$($_.Key) -eq $True
+        $Managables.$($_.Key).Create -eq $True
     } | ForEach-Object {
 
         if ($Account.$($_.Key) -eq $PreviousAccount.$($_.Key)) {
             Write-Verbose -Verbose "Authentication Method '$($_.Key)' is already up to date, skipping..."
         }
 
+        # Delete Method
         elseif ([string]::IsNullOrWhiteSpace($Account.$($_.Key))) {
-            Write-Verbose -Verbose "New value for Authentication Method '$($_.Key)' is empty, skipping..."
 
-            # Implement Delete Action here
-            $Account.$($_.Key) = $PreviousAccount.$($_.Key)
+            if ($Managables.$($_.Key).Delete -eq $True) {
+                Write-Verbose -Verbose "Deleting Authentication Method '$($_.Key)': $($PreviousAccount.$($_.Key))."
+
+                $Uri = $_.BaseUrl + "/" + $EndpointGuids.$($_.Key)
+
+                if ($dryRun -eq $False) {
+                    [void] (Invoke-RestMethod @AADMethod -Uri $Uri -Method 'Delete')
+                }
+
+                $AuditLogs.Add([PSCustomObject]@{
+                        Action  = "DeleteAccount"
+                        Message = "Deleted Authentication Method '$($_.Key)' with value '$($PreviousAccount.$($_.Key))'"
+                        IsError = $False
+                    })
+
+                Write-Verbose -Verbose "Successfully deleted Authentication Method '$($_.Key)': $($account.$($_.Key))"
+            }
+            else {
+                Write-Verbose -Verbose "Authentication Method '$($_.Key)' is set to not delete when empty. The value stays '$($PreviousAccount.$($_.Key))'."
+
+                $Account.$($_.Key) = $PreviousAccount.$($_.Key)
+            }
         }
 
+        # Create Method
         elseif ($EndpointGuids.$($_.Key) -notin $AuthenticationMethods.id) {
             Write-Verbose -Verbose "Adding Authentication Method '$($_.Key)': $($Account.$($_.Key))."
 
@@ -218,7 +238,8 @@ try {
             Write-Verbose -Verbose "Successfully created Authentication Method '$($_.Key)': $($account.$($_.Key))"
         }
 
-        elseif ($Updatables.$($_.Key) -eq $True) {
+        # Update Method
+        elseif ($Managables.$($_.Key).Update -eq $True) {
             Write-Verbose -Verbose "Updating Authentication Method '$($_.Key)' from '$($PreviousAccount.$($_.Key))' to '$($Account.$($_.Key))'"
 
             $Uri = $_.BaseUrl + "/" + $EndpointGuids.$($_.Key)
@@ -245,7 +266,8 @@ try {
         }
     }
 
-    if ($Managables.mobile -and -not [string]::IsNullOrWhiteSpace($Account.mobile) -and $enableSMSSignIn -eq $True) {
+    # Enable SMS SignIn
+    if ($Managables.mobile.Create -and -not [string]::IsNullOrWhiteSpace($Account.mobile) -and $enableSMSSignIn -eq $True) {
         Write-Verbose -Verbose "Enabling Mobile SMS Sign-in."
 
         $Uri = $BaseUri + "/phoneMethods/$($EndpointGuids.mobile)"
@@ -271,8 +293,8 @@ try {
     }
 
     # remove unmanaged props
-    $ManagableFields = $Managables.PSObject.Properties | Where-Object {
-        $_.value -eq $True
+    $ManagableFields = $Managables.PsObject.Properties | Where-Object {
+        $_.Value.Create -eq $True
     } | Select-Object -ExpandProperty 'Name'
 
     $Account = $Account | Select-Object -Property $ManagableFields

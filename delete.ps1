@@ -5,15 +5,15 @@ $Config = $Configuration | ConvertFrom-Json
 $Azure = $Config.Azure
 $Managables = $Config.Fields
 
-$enableSMSSignIn = $Config.enableSMSSignIn
+#$enableSMSSignIn = $Config.enableSMSSignIn
 #endregion Config
 
 #region default properties
-$p = $person | ConvertFrom-Json
-$m = $manager | ConvertFrom-Json
+#$p = $person | ConvertFrom-Json
+#$m = $manager | ConvertFrom-Json
 
 $aRef = $accountReference | ConvertFrom-Json
-$mRef = $managerAccountReference | ConvertFrom-Json
+#$mRef = $managerAccountReference | ConvertFrom-Json
 
 $AuditLogs = [Collections.Generic.List[PSCustomObject]]::new()
 $Success = $False

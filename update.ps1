@@ -10,12 +10,12 @@ $enableSMSSignIn = $Config.enableSMSSignIn
 
 #region default properties
 $p = $Person | ConvertFrom-Json
-$m = $Manager | ConvertFrom-Json
-$pp = $PreviousPerson | ConvertFrom-Json
-$pd = $PersonDifferences | ConvertFrom-Json
+#$m = $Manager | ConvertFrom-Json
+#$pp = $PreviousPerson | ConvertFrom-Json
+#$pd = $PersonDifferences | ConvertFrom-Json
 
 $aRef = $AccountReference | ConvertFrom-Json
-$mRef = $ManagerAccountReference | ConvertFrom-Json
+#$mRef = $ManagerAccountReference | ConvertFrom-Json
 
 $AuditLogs = [Collections.Generic.List[PSCustomObject]]::new()
 $Success = $False

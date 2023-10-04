@@ -33,6 +33,16 @@
     }
   },
   {
+    "key": "Mode.Preview",
+    "type": "checkbox",
+    "defaultValue": false,
+    "templateOptions": {
+      "label": "Preview Mode",
+      "description": "This mode is to generate logging, without doing anyting in production.",
+      "required": false
+    }
+  },
+  {
     "key": "Fields.email.Create",
     "type": "checkbox",
     "defaultValue": false,

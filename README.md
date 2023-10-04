@@ -10,6 +10,9 @@ $Config = [PSCustomObject]@{
         client_id     = ''
         client_secret = ''
     }
+    Mode = [PSCustomObject]@{
+        Preview = $False
+    }
     Fields = [PSCustomObject]@{
         email = [PSCustomObject]@{
             Create = $True

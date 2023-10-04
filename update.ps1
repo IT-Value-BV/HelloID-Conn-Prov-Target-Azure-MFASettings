@@ -188,7 +188,7 @@ try {
 
                 $Uri = $_.BaseUrl + "/" + $EndpointGuids.$($_.Key)
 
-                if ($dryRun -eq $False) {
+                if ($dryRun -eq $False -and $Config.Mode.Preview -eq $False) {
                     [void] (Invoke-RestMethod @AADMethod -Uri $Uri -Method 'Delete')
                 }
 
@@ -213,7 +213,7 @@ try {
 
             $Uri = $_.BaseUrl
 
-            if ($dryRun -eq $False) {
+            if ($dryRun -eq $False -and $Config.Mode.Preview -eq $False) {
                 [void] (Invoke-RestMethod @AADMethod -Uri $Uri -Method 'Post' -Body ($_.Body | ConvertTo-Json -Compress))
             }
             else {
@@ -235,7 +235,7 @@ try {
 
             $Uri = $_.BaseUrl + "/" + $EndpointGuids.$($_.Key)
 
-            if ($dryRun -eq $False) {
+            if ($dryRun -eq $False -and $Config.Mode.Preview -eq $False) {
                 [void] (Invoke-RestMethod @AADMethod -Uri $Uri -Method 'Put' -Body ($_.Body | ConvertTo-Json -Compress))
             }
             else {
@@ -270,7 +270,7 @@ try {
         elseif ($MobileAuthMethod.smsSignInState -eq 'notEnabled') {
             $Uri = $BaseUri + "/phoneMethods/$($EndpointGuids.mobile)/enableSmsSignIn"
 
-            if ($dryRun -eq $False) {
+            if ($dryRun -eq $False -and $Config.Mode.Preview -eq $False) {
                 [void] (Invoke-RestMethod @AADMethod -Uri $Uri -Method 'Post')
             }
 

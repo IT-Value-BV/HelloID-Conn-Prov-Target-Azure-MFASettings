@@ -107,7 +107,7 @@ try {
 
             $Uri = $_.BaseUrl + "/" + $EndpointGuids.$($_.Key)
 
-            if ($dryRun -eq $False) {
+            if ($dryRun -eq $False -and $Config.Mode.Preview -eq $False) {
                 [void] (Invoke-RestMethod @AADMethod -Uri $Uri -Method 'Delete')
             }
 

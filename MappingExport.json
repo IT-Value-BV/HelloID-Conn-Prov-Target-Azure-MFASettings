@@ -1,0 +1,90 @@
+{
+  "Version": "v1",
+  "MappingFields": [
+    {
+      "Name": "email",
+      "Description": "The email address registered to this user.",
+      "Type": "Text",
+      "MappingActions": [
+        {
+          "MapForActions": [
+            "Create",
+            "Update"
+          ],
+          "MappingMode": "Field",
+          "Value": "\"Person.Contact.Personal.Email\"",
+          "UsedInNotifications": false,
+          "StoreInAccountData": true
+        }
+      ]
+    },
+    {
+      "Name": "office",
+      "Description": "An office phone or landline, usable only for voice calls.\nNOTE: Phone numbers use the format \"+{country code} {number}x{extension}\", with extension optional.\nFor example, +1 5555551234 or +1 5555551234x123 are valid.\nNumbers are rejected when creating/updating if they do not match the required format.",
+      "Type": "Text",
+      "MappingActions": [
+        {
+          "MapForActions": [
+            "Create",
+            "Update"
+          ],
+          "MappingMode": "Complex",
+          "Value": "\"function getOffice() {\\r\\n    let office = Person.Contact.Business.Phone.Fixed;\\r\\n\\r\\n    if (typeof office !== 'undefined' && office) {\\r\\n        // Remove spaces and -\\r\\n        office = office.replace(/-/g, '').replace(/\\\\s/g, '');\\r\\n\\r\\n        // Replace 06 with +316\\r\\n        if (office.startsWith(\\\"06\\\")) {\\r\\n            office = \\\"+316\\\" + office.substring(2);\\r\\n        // Replace 0031 with +31\\r\\n        } else if (office.startsWith(\\\"0031\\\")) {\\r\\n            office = \\\"+31\\\" + office.substring(4);\\r\\n        // Replace 00 with +\\r\\n        } else if (office.startsWith(\\\"00\\\")) {\\r\\n            office = \\\"+\\\" + office.substring(2);\\r\\n        }\\r\\n\\r\\n        // Make sure it starts with +\\r\\n        if (!office.startsWith(\\\"+\\\")) {\\r\\n            office = \\\"+\\\" + office;\\r\\n        }\\r\\n    }\\r\\n\\r\\n    return office;\\r\\n}\\r\\n\\r\\ngetOffice();\"",
+          "UsedInNotifications": false,
+          "StoreInAccountData": true
+        }
+      ]
+    },
+    {
+      "Name": "userPrincipalName",
+      "Description": "",
+      "Type": "Text",
+      "MappingActions": [
+        {
+          "MapForActions": [
+            "Create"
+          ],
+          "MappingMode": "None",
+          "Value": "\"\"",
+          "UsedInNotifications": false,
+          "StoreInAccountData": false
+        }
+      ]
+    },
+    {
+      "Name": "alternateMobile",
+      "Description": "An alternate or backup mobile phone, usable only for voice calls.\nNOTE: Phone numbers use the format \"+{country code} {number}x{extension}\", with extension optional.\nFor example, +1 5555551234 or +1 5555551234x123 are valid.\nNumbers are rejected when creating/updating if they do not match the required format",
+      "Type": "Text",
+      "MappingActions": [
+        {
+          "MapForActions": [
+            "Create",
+            "Update"
+          ],
+          "MappingMode": "Complex",
+          "Value": "\"function getAlternateMobile() {\\r\\n    let alternateMobile = Person.Contact.Business.Phone.Mobile;\\r\\n\\r\\n    if (typeof alternateMobile !== 'undefined' && alternateMobile) {\\r\\n        // Remove spaces and -\\r\\n        alternateMobile = alternateMobile.replace(/-/g, '').replace(/\\\\s/g, '');\\r\\n\\r\\n        // Replace 06 with +316\\r\\n        if (alternateMobile.startsWith(\\\"06\\\")) {\\r\\n            alternateMobile = \\\"+316\\\" + alternateMobile.substring(2);\\r\\n        // Replace 0031 with +31\\r\\n        } else if (alternateMobile.startsWith(\\\"0031\\\")) {\\r\\n            alternateMobile = \\\"+31\\\" + alternateMobile.substring(4);\\r\\n        // Replace 00 with +\\r\\n        } else if (alternateMobile.startsWith(\\\"00\\\")) {\\r\\n            alternateMobile = \\\"+\\\" + alternateMobile.substring(2);\\r\\n        }\\r\\n\\r\\n        // Make sure it starts with +\\r\\n        if (!alternateMobile.startsWith(\\\"+\\\")) {\\r\\n            alternateMobile = \\\"+\\\" + alternateMobile;\\r\\n        }\\r\\n    }\\r\\n\\r\\n    return alternateMobile;\\r\\n}\\r\\n\\r\\ngetAlternateMobile();\"",
+          "UsedInNotifications": false,
+          "StoreInAccountData": true
+        }
+      ]
+    },
+    {
+      "Name": "mobile",
+      "Description": "A primary mobile phone, usable for SMS and voice calls.\nNOTE: Phone numbers use the format \"+{country code} {number}x{extension}\", with extension optional.\nFor example, +1 5555551234 or +1 5555551234x123 are valid.\nNumbers are rejected when creating/updating if they do not match the required format.",
+      "Type": "Text",
+      "MappingActions": [
+        {
+          "MapForActions": [
+            "Create",
+            "Update"
+          ],
+          "MappingMode": "Complex",
+          "Value": "\"function getMobile() {\\n    let mobile = Person.Contact.Personal.Phone.Mobile;\\n\\n    if (typeof mobile !== 'undefined' && mobile) {\\n        // Remove spaces and -\\n        mobile = mobile.replace(/-/g, '').replace(/\\\\s/g, '');\\n\\n        // Replace 06 with +316\\n        if (mobile.startsWith(\\\"06\\\")) {\\n            mobile = \\\"+316\\\" + mobile.substring(2);\\n        // Replace 0031 with +31\\n        } else if (mobile.startsWith(\\\"0031\\\")) {\\n            mobile = \\\"+31\\\" + mobile.substring(4);\\n        // Replace 00 with +\\n        } else if (mobile.startsWith(\\\"00\\\")) {\\n            mobile = \\\"+\\\" + mobile.substring(2);\\n        }\\n\\n        // Make sure it starts with +\\n        if (!mobile.startsWith(\\\"+\\\")) {\\n            mobile = \\\"+\\\" + mobile;\\n        }\\n    }\\n\\n    return mobile;\\n}\\n\\ngetMobile();\"",
+          "UsedInNotifications": false,
+          "StoreInAccountData": true
+        }
+      ]
+    }
+  ],
+  "UniqueFieldNames": []
+}

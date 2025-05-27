@@ -1,43 +1,11 @@
 #region Config
-$Config = $Configuration | ConvertFrom-Json
-# $Config = Get-Content -Raw -Path '../Target-Azure-MFASettings.json' | ConvertFrom-Json
-
-$Azure = $Config.Azure
-$Managables = $Config.Fields
-
-#$enableSMSSignIn = $Config.enableSMSSignIn
+$Azure = $actionContext.Configuration.Azure
+$Managables = $actionContext.Configuration.Fields
+$enableSMSSignIn = $actionContext.Configuration.enableSMSSignIn
 #endregion Config
-
-#region default properties
-#$p = $person | ConvertFrom-Json
-#$m = $manager | ConvertFrom-Json
-
-$aRef = $accountReference | ConvertFrom-Json
-#$mRef = $managerAccountReference | ConvertFrom-Json
-
-$AuditLogs = [Collections.Generic.List[PSCustomObject]]::new()
-$Success = $False
-#endregion default properties
-
-# Set TLS to accept TLS, TLS 1.1 and TLS 1.2
-[Net.ServicePointManager]::SecurityProtocol = @(
-    [Net.SecurityProtocolType]::Tls
-    [Net.SecurityProtocolType]::Tls11
-    [Net.SecurityProtocolType]::Tls12
-)
-
-# Build the Final Account object
-$Account = [PSCustomObject]@{ }
 
 # Start Script
 try {
-    $EndpointGuids = [PSCustomObject]@{
-        email           = '3ddfcfc8-9383-446f-83cc-3ab9be4be18f'
-        mobile          = '3179e48a-750b-4051-897c-87b9720928f7'
-        alternateMobile = 'b6332ec1-7057-4abe-9331-3d72feddfe41'
-        office          = 'e37fc753-ff3b-4958-9484-eaa9425c82bc'
-    }
-
     # Generating Microsoft Graph API Access Token..
     $RestMethod = @{
         Method      = 'Post'
@@ -62,8 +30,15 @@ try {
         }
     }
 
+    $EndpointGuids = [PSCustomObject]@{
+        email           = '3ddfcfc8-9383-446f-83cc-3ab9be4be18f'
+        mobile          = '3179e48a-750b-4051-897c-87b9720928f7'
+        alternateMobile = 'b6332ec1-7057-4abe-9331-3d72feddfe41'
+        office          = 'e37fc753-ff3b-4958-9484-eaa9425c82bc'
+    }
+
     #Gathering current Authentication Methods for the user..
-    $BaseUri = "https://graph.microsoft.com/beta/users/$($aRef)/authentication"
+    $BaseUri = "https://graph.microsoft.com/beta/users/$($ActionContext.References.Account)/authentication"
 
     $Uri = $BaseUri + "/methods"
 
@@ -107,11 +82,11 @@ try {
 
             $Uri = $_.BaseUrl + "/" + $EndpointGuids.$($_.Key)
 
-            if ($dryRun -eq $False -and $Config.Mode.Preview -eq $False) {
+            if ($ActionContext.DryRun -eq $False -and $Config.Mode.Preview -eq $False) {
                 [void] (Invoke-RestMethod @AADMethod -Uri $Uri -Method 'Delete')
             }
 
-            $AuditLogs.Add([PSCustomObject]@{
+            $OutputContext.AuditLogs.Add([PSCustomObject]@{
                     Action  = "DeleteAccount"
                     Message = "Deleted Authentication Method '$($_.Key)' with value '$($PreviousAccount.$($_.Key))'"
                     IsError = $False
@@ -128,8 +103,8 @@ try {
 
     $PreviousAccount = $PreviousAccount | Select-Object -Property $ManagableFields
 
-    if ($AuditLogs.Count -eq 0) {
-        $AuditLogs.Add([PSCustomObject]@{
+    if ($OutputContext.AuditLogs.Count -eq 0) {
+        $OutputContext.AuditLogs.Add([PSCustomObject]@{
                 Action  = "DeleteAccount"
                 Message = "Nothing to delete, uncorrelated account."
                 IsError = $False
@@ -137,7 +112,7 @@ try {
     }
 
     # if we reached the end of the Try, we can asume the script has done its job succesfully
-    $Success = $True
+    $OutputContext.Success = $True
 }
 catch {
     $AuditLogs.Add([PSCustomObject]@{
@@ -148,12 +123,3 @@ catch {
 
     Write-Warning $_
 }
-
-# Send results
-$Result = [PSCustomObject]@{
-    Success   = $Success
-    AuditLogs = $AuditLogs
-    Account   = $Account
-}
-
-Write-Output $Result | ConvertTo-Json -Depth 10

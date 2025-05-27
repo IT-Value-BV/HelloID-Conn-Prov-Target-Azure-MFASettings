@@ -37,8 +37,8 @@
     "type": "checkbox",
     "defaultValue": false,
     "templateOptions": {
-      "label": "Preview Mode",
-      "description": "This mode is to generate logging, without doing anyting in production.",
+      "label": "Run in Preview Mode",
+      "description": "this will generate te logging, but will not change the values in Entra ID",
       "required": false
     }
   },

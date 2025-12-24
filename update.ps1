@@ -43,6 +43,13 @@ try {
     $Uri = $BaseUri + "/methods"
 
     $AuthenticationMethods = (Invoke-RestMethod @AADMethod -Method 'Get' -Uri $Uri).value
+    
+    # Retrieve preferred authentication methods for the user
+    $BaseUri = "https://graph.microsoft.com/beta/users/$($ActionContext.References.Account)/authentication"
+
+    $Uri = $BaseUri + '/signInPreferences'
+
+    $PrefferedAuthenticationMethods = (Invoke-RestMethod @AADMethod -Method 'Get' -Uri $Uri)
 
     # Build the PreviousAccount
     $PreviousAccount = [PSCustomObject]@{
@@ -127,6 +134,32 @@ try {
 
             if ($Managables.$($_.Key).Delete -eq $True) {
                 Write-Verbose -Verbose "Deleting Authentication Method '$($_.Key)': $($PreviousAccount.$($_.Key))."
+
+                # When deleting mobile and primaryauth method is set to mobile, set primary auth method to push
+                if (
+                    $_.Key -eq 'mobile' -and 
+                    $PrefferedAuthenticationMethods.userPreferredMethodForSecondaryAuthentication -eq 'sms' -and
+                    $AuthenticationMethods.'@odata.type' -contains '#microsoft.graph.microsoftAuthenticatorAuthenticationMethod'
+                ) {
+                    $BaseUri = "https://graph.microsoft.com/beta/users/$($ActionContext.References.Account)/authentication"
+                    $Uri = $BaseUri + '/signInPreferences'
+
+                    $Body = @{
+                        userPreferredMethodForSecondaryAuthentication = 'push'
+                    } | ConvertTo-Json
+
+                    $AADMethod.ContentType = 'application/json'
+
+                    [void] (Invoke-RestMethod @AADMethod -Method 'PATCH' -Uri $Uri -Body $Body)
+
+                    $AADMethod.ContentType = 'application/x-www-form-urlencoded'
+
+                    $OutputContext.AuditLogs.Add([PSCustomObject]@{
+                        Action  = "UpdateAccount"
+                        Message = "Set prefferd Authentication Method to 'push'"
+                        IsError = $False
+                    })
+                }
 
                 $Uri = $_.BaseUrl + "/" + $EndpointGuids.$($_.Key)
 
@@ -253,4 +286,3 @@ catch {
         })
     Write-Warning $_
 }
-
